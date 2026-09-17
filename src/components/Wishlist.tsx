@@ -25,9 +25,24 @@ const Wishlist: React.FC = () => {
     loadAllMovies();
   }, []);
 
-  const wishlistMovies = allMovies.filter((m) =>
-    wishlist.some((w) => w.movieId === m.id)
-  );
+  // Get wishlist movies - prefer live TMDB data, fallback to stored movie data
+  const wishlistMovies: Movie[] = wishlist.map((w) => {
+    const liveMovie = allMovies.find((m) => m.id === w.movieId);
+    return liveMovie || w.movieData || {
+      id: w.movieId,
+      title: 'Unknown Title',
+      overview: '',
+      poster_path: null,
+      backdrop_path: null,
+      release_date: '',
+      vote_average: 0,
+      vote_count: 0,
+      genre_ids: [],
+      media_type: 'movie' as const,
+      original_language: 'en',
+      popularity: 0,
+    };
+  });
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

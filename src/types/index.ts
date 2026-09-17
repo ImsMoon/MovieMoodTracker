@@ -22,12 +22,14 @@ export interface UserRating {
   ratedAt: string;
   syncedToIMDB: boolean;
   syncedToRT: boolean;
+  movieData?: Movie;
 }
 
 export interface WishlistItem {
   movieId: number;
   addedAt: string;
   priority: 'high' | 'medium' | 'low';
+  movieData?: Movie;
 }
 
 export interface UserProfile {

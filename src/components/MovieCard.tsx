@@ -40,6 +40,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, index }) => {
       ratedAt: new Date().toISOString(),
       syncedToIMDB: false,
       syncedToRT: false,
+      movieData: movie,
     };
     addRating(rating);
     // Remove from wishlist if it was there
@@ -56,6 +57,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, index }) => {
       movieId: movie.id,
       addedAt: new Date().toISOString(),
       priority: 'medium',
+      movieData: movie,
     };
     addToWishlist(item);
   };

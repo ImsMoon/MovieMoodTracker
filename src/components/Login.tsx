@@ -13,54 +13,63 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const [showIMDBModal, setShowIMDBModal] = useState(false);
   const [showRTModal, setShowRTModal] = useState(false);
   const [credentials, setCredentials] = useState({ email: '', password: '' });
-  const [selectedPlatform, setSelectedPlatform] = useState<'imdb' | 'rt' | null>(null);
+
+  const createDefaultUser = (): UserProfile => ({
+    id: `user_${Date.now()}`,
+    name: 'Movie Buff',
+    email: 'moviebuff@gmail.com',
+    avatar: undefined,
+    imdbConnected: false,
+    rtConnected: false,
+  });
 
   const handleSocialLogin = (provider: string) => {
-    // If connecting a platform, handle that
-    if (provider.startsWith('imdb-') || provider.startsWith('rt-')) {
-      if (!user) {
-        // Create user first if not logged in
-        const newUser: UserProfile = {
-          id: `user_${Date.now()}`,
-          name: 'Movie Buff',
-          email: 'moviebuff@gmail.com',
-          avatar: undefined,
-          imdbConnected: false,
-          rtConnected: false,
-        };
-        setUser(newUser);
-        setAuthenticated(true);
-      }
-
-      const currentUser = user || {
-        id: `user_${Date.now()}`,
-        name: 'Movie Buff',
-        email: 'moviebuff@gmail.com',
-        avatar: undefined,
-        imdbConnected: false,
-        rtConnected: false,
+    // Platform connection flows
+    if (provider.startsWith('imdb-')) {
+      const currentUser = user || createDefaultUser();
+      const updatedUser: UserProfile = {
+        ...currentUser,
+        imdbConnected: true,
+        imdbUsername: credentials.email ? credentials.email.split('@')[0] : 'imdb_user',
       };
-
-      const updatedUser = { ...currentUser };
-      if (provider.startsWith('imdb-')) {
-        updatedUser.imdbConnected = true;
-        updatedUser.imdbUsername = credentials.email ? credentials.email.split('@')[0] : 'imdb_user';
-      } else {
-        updatedUser.rtConnected = true;
-        updatedUser.rtUsername = credentials.email ? credentials.email.split('@')[0] : 'rt_user';
-      }
       setUser(updatedUser);
+      if (!user) {
+        setAuthenticated(true);
+        onLoginSuccess();
+      }
       setShowIMDBModal(false);
+      setCredentials({ email: '', password: '' });
+      return;
+    }
+
+    if (provider.startsWith('rt-')) {
+      const currentUser = user || createDefaultUser();
+      const updatedUser: UserProfile = {
+        ...currentUser,
+        rtConnected: true,
+        rtUsername: credentials.email ? credentials.email.split('@')[0] : 'rt_user',
+      };
+      setUser(updatedUser);
+      if (!user) {
+        setAuthenticated(true);
+        onLoginSuccess();
+      }
       setShowRTModal(false);
       setCredentials({ email: '', password: '' });
-      setSelectedPlatform(null);
       return;
     }
 
     // Regular social login
+    const nameMap: Record<string, string> = {
+      google: 'Movie Buff',
+      apple: 'Cinema Lover',
+      facebook: 'Film Fan',
+      demo: 'Demo User',
+    };
+
     const mockUser: UserProfile = {
       id: `user_${Date.now()}`,
-      name: provider === 'google' ? 'Movie Buff' : provider === 'apple' ? 'Cinema Lover' : provider === 'demo' ? 'Demo User' : 'Film Fan',
+      name: nameMap[provider] || 'User',
       email: `${provider}@example.com`,
       avatar: undefined,
       imdbConnected: false,
@@ -69,15 +78,6 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     setUser(mockUser);
     setAuthenticated(true);
     onLoginSuccess();
-  };
-
-  const handlePlatformConnect = (platform: 'imdb' | 'rt') => {
-    setSelectedPlatform(platform);
-    if (platform === 'imdb') {
-      setShowIMDBModal(true);
-    } else {
-      setShowRTModal(true);
-    }
   };
 
   return (
@@ -159,7 +159,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
           {/* Platform Connect Buttons */}
           <div className="space-y-3">
             <button
-              onClick={() => handlePlatformConnect('imdb')}
+              onClick={() => setShowIMDBModal(true)}
               className="w-full flex items-center justify-center gap-3 bg-[#F5C518] hover:bg-[#e6b800] text-black font-medium py-3 px-4 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
             >
               <Star className="w-5 h-5" />
@@ -167,7 +167,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
             </button>
 
             <button
-              onClick={() => handlePlatformConnect('rt')}
+              onClick={() => setShowRTModal(true)}
               className="w-full flex items-center justify-center gap-3 bg-[#FA320A] hover:bg-[#e62d08] text-white font-medium py-3 px-4 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
             >
               <CheckCircle className="w-5 h-5" />

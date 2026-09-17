@@ -25,9 +25,24 @@ const RatedMovies: React.FC = () => {
     loadAllMovies();
   }, []);
 
-  const ratedMovies = allMovies.filter((m) =>
-    ratings.some((r) => r.movieId === m.id)
-  );
+  // Get rated movies - prefer live TMDB data, fallback to stored movie data
+  const ratedMovies: Movie[] = ratings.map((r) => {
+    const liveMovie = allMovies.find((m) => m.id === r.movieId);
+    return liveMovie || r.movieData || {
+      id: r.movieId,
+      title: 'Unknown Title',
+      overview: '',
+      poster_path: null,
+      backdrop_path: null,
+      release_date: '',
+      vote_average: 0,
+      vote_count: 0,
+      genre_ids: [],
+      media_type: 'movie' as const,
+      original_language: 'en',
+      popularity: 0,
+    };
+  });
 
   const handleSync = async (movieId: number, platform: 'imdb' | 'rt') => {
     setSyncing(movieId);
