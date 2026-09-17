@@ -1,15 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Heart, Trash2, Eye, Film } from 'lucide-react';
+import { Heart, Film, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Movie } from '../types';
 import { useApp } from '../context/AppContext';
-import { getImageUrl, GENRE_MAP, fetchPopularMovies, fetchPopularTV, fetchTrending } from '../services/tmdb';
+import { fetchPopularMovies, fetchPopularTV, fetchTrending } from '../services/tmdb';
 import MovieCard from './MovieCard';
 
 const Wishlist: React.FC = () => {
-  const { wishlist, removeFromWishlist } = useApp();
+  const { wishlist } = useApp();
   const [allMovies, setAllMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
 
   useEffect(() => {
     const loadAllMovies = async () => {
@@ -25,7 +28,6 @@ const Wishlist: React.FC = () => {
     loadAllMovies();
   }, []);
 
-  // Get wishlist movies - prefer live TMDB data, fallback to stored movie data
   const wishlistMovies: Movie[] = wishlist.map((w) => {
     const liveMovie = allMovies.find((m) => m.id === w.movieId);
     return liveMovie || w.movieData || {
@@ -44,27 +46,79 @@ const Wishlist: React.FC = () => {
     };
   });
 
+  const checkScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 10);
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 10);
+  }, []);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.addEventListener('scroll', checkScroll);
+    checkScroll();
+    return () => el.removeEventListener('scroll', checkScroll);
+  }, [checkScroll, wishlistMovies.length]);
+
+  const scroll = (direction: 'left' | 'right') => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const scrollAmount = el.clientWidth * 0.7;
+    el.scrollBy({
+      left: direction === 'left' ? -scrollAmount : scrollAmount,
+      behavior: 'smooth',
+    });
+  };
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="py-8">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-8"
+        className="px-4 sm:px-6 lg:px-8 mb-8"
       >
-        <div className="flex items-center gap-3 mb-2">
-          <Heart className="w-8 h-8 text-pink-400" />
-          <h1 className="text-3xl font-bold text-white">My Wishlist</h1>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-pink-500/20">
+              <Heart className="w-6 h-6 text-pink-400" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-white">My Wishlist</h1>
+              <p className="text-gray-400">
+                {wishlist.length} item{wishlist.length !== 1 ? 's' : ''} waiting to be watched
+              </p>
+            </div>
+          </div>
+          {wishlistMovies.length > 0 && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => scroll('left')}
+                disabled={!canScrollLeft}
+                className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => scroll('right')}
+                disabled={!canScrollRight}
+                className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          )}
         </div>
-        <p className="text-gray-400">
-          Movies and series you want to watch. {wishlist.length} item{wishlist.length !== 1 ? 's' : ''} in your list.
-        </p>
       </motion.div>
 
       {loading && (
-        <div className="text-center py-20">
-          <div className="animate-spin w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full mx-auto mb-4" />
-          <p className="text-gray-400">Loading your wishlist...</p>
+        <div className="flex gap-4 overflow-hidden px-4 sm:px-6 lg:px-8">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="flex-shrink-0 w-[280px] sm:w-[320px] h-[420px] animate-pulse">
+              <div className="w-full h-full bg-gray-800 rounded-2xl" />
+            </div>
+          ))}
         </div>
       )}
 
@@ -83,12 +137,22 @@ const Wishlist: React.FC = () => {
       )}
 
       {!loading && wishlistMovies.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        <div
+          ref={scrollRef}
+          className="flex gap-4 overflow-x-auto px-4 sm:px-6 lg:px-8 pb-4"
+          style={{
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            WebkitOverflowScrolling: 'touch',
+          }}
+        >
           {wishlistMovies.map((movie, index) => (
             <MovieCard key={movie.id} movie={movie} index={index} />
           ))}
         </div>
       )}
+
+      <style>{`div::-webkit-scrollbar { display: none; }`}</style>
     </div>
   );
 };

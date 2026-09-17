@@ -7,8 +7,9 @@ import Dashboard from './components/Dashboard';
 import Wishlist from './components/Wishlist';
 import RatedMovies from './components/RatedMovies';
 import Profile from './components/Profile';
+import Stats from './components/Stats';
 
-// Error Boundary to catch runtime errors
+// Error Boundary
 interface ErrorBoundaryState {
   hasError: boolean;
   error: Error | null;
@@ -77,6 +78,8 @@ const AppContent: React.FC = () => {
         return <Wishlist />;
       case 'rated':
         return <RatedMovies />;
+      case 'stats':
+        return <Stats />;
       case 'profile':
         return <Profile />;
       default:

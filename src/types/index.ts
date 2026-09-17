@@ -23,6 +23,7 @@ export interface UserRating {
   syncedToIMDB: boolean;
   syncedToRT: boolean;
   movieData?: Movie;
+  watchedAt?: WatchedDate; // Optional: when the user watched it
 }
 
 export interface WishlistItem {
@@ -49,4 +50,9 @@ export interface AuthState {
   loginMethod: string | null;
 }
 
-export type ViewType = 'dashboard' | 'wishlist' | 'profile' | 'rated';
+export type ViewType = 'dashboard' | 'wishlist' | 'profile' | 'rated' | 'stats';
+
+export interface WatchedDate {
+  year: number;
+  month?: number; // 1-12, optional
+}

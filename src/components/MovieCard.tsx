@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Star, Heart, Eye, Check, BookmarkPlus, Info, X, ThumbsUp, ThumbsDown } from 'lucide-react';
-import { Movie, UserRating, WishlistItem } from '../types';
+import { Star, Heart, Eye, Check, BookmarkPlus, Info, X, ThumbsUp, Calendar } from 'lucide-react';
+import { Movie, UserRating, WishlistItem, WatchedDate } from '../types';
 import { useApp } from '../context/AppContext';
 import { getImageUrl, GENRE_MAP } from '../services/tmdb';
 
@@ -10,13 +10,17 @@ interface MovieCardProps {
   index: number;
 }
 
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
 const MovieCard: React.FC<MovieCardProps> = ({ movie, index }) => {
-  const { ratings, wishlist, addRating, addToWishlist, removeFromWishlist, removeRating } = useApp();
+  const { ratings, wishlist, addRating, addToWishlist, removeFromWishlist } = useApp();
   const [showDetails, setShowDetails] = useState(false);
   const [showRating, setShowRating] = useState(false);
   const [userRating, setUserRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [review, setReview] = useState('');
+  const [watchedYear, setWatchedYear] = useState<string>('');
+  const [watchedMonth, setWatchedMonth] = useState<string>('');
 
   const hasRated = ratings.some((r) => r.movieId === movie.id);
   const isInWishlist = wishlist.some((w) => w.movieId === movie.id);
@@ -33,6 +37,12 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, index }) => {
 
   const handleSubmitRating = () => {
     if (userRating === 0) return;
+    
+    const watchedAt: WatchedDate | undefined = watchedYear ? {
+      year: parseInt(watchedYear),
+      month: watchedMonth ? parseInt(watchedMonth) : undefined,
+    } : undefined;
+
     const rating: UserRating = {
       movieId: movie.id,
       rating: userRating,
@@ -41,15 +51,17 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, index }) => {
       syncedToIMDB: false,
       syncedToRT: false,
       movieData: movie,
+      watchedAt,
     };
     addRating(rating);
-    // Remove from wishlist if it was there
     if (isInWishlist) {
       removeFromWishlist(movie.id);
     }
     setShowRating(false);
     setUserRating(0);
     setReview('');
+    setWatchedYear('');
+    setWatchedMonth('');
   };
 
   const handleAddToWishlist = () => {
@@ -66,119 +78,82 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, index }) => {
     removeFromWishlist(movie.id);
   };
 
+  const currentYear = new Date().getFullYear();
+  const yearOptions = Array.from({ length: 30 }, (_, i) => currentYear - i);
+
   return (
     <>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: index * 0.05, duration: 0.4 }}
-        className="group relative bg-gray-800/50 rounded-2xl overflow-hidden border border-white/5 hover:border-white/20 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/10"
+      {/* Slider Card - Wide format */}
+      <div
+        className="group relative flex-shrink-0 w-[280px] sm:w-[320px] h-[420px] rounded-2xl overflow-hidden border border-white/5 hover:border-white/20 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/20 cursor-pointer"
+        onClick={() => setShowDetails(true)}
       >
-        {/* Poster */}
-        <div className="relative aspect-[2/3] overflow-hidden">
-          <img
-            src={getImageUrl(movie.poster_path)}
-            alt={title}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-            loading="lazy"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent opacity-80" />
-          
-          {/* TMDB Rating */}
-          <div className="absolute top-3 left-3 flex items-center gap-1 bg-black/60 backdrop-blur-sm rounded-full px-2 py-1">
+        {/* Poster Background */}
+        <img
+          src={getImageUrl(movie.backdrop_path || movie.poster_path, 'w780')}
+          alt={title}
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          loading="lazy"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+        
+        {/* Top Badges */}
+        <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
+          <div className="flex items-center gap-1.5 bg-black/60 backdrop-blur-sm rounded-full px-2.5 py-1">
             <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
-            <span className="text-white text-xs font-medium">{movie.vote_average?.toFixed(1)}</span>
+            <span className="text-white text-xs font-semibold">{movie.vote_average?.toFixed(1)}</span>
           </div>
+          <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+            movie.media_type === 'tv' 
+              ? 'bg-purple-500/80 text-white' 
+              : 'bg-blue-500/80 text-white'
+          }`}>
+            {movie.media_type === 'tv' ? 'Series' : 'Movie'}
+          </span>
+        </div>
 
-          {/* Media Type Badge */}
-          <div className="absolute top-3 right-3">
-            <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-              movie.media_type === 'tv' 
-                ? 'bg-purple-500/80 text-white' 
-                : 'bg-blue-500/80 text-white'
-            }`}>
-              {movie.media_type === 'tv' ? 'Series' : 'Movie'}
-            </span>
+        {/* Status Overlay */}
+        {hasRated && (
+          <div className="absolute top-12 left-3 flex items-center gap-1 bg-green-500/90 backdrop-blur-sm rounded-full px-2.5 py-1">
+            <Check className="w-3 h-3 text-white" />
+            <span className="text-white text-xs font-medium">Rated {existingRating?.rating}/10</span>
           </div>
+        )}
+        {isInWishlist && !hasRated && (
+          <div className="absolute top-12 left-3 flex items-center gap-1 bg-pink-500/90 backdrop-blur-sm rounded-full px-2.5 py-1">
+            <Heart className="w-3 h-3 text-white fill-white" />
+            <span className="text-white text-xs font-medium">Wishlisted</span>
+          </div>
+        )}
 
-          {/* Status Badges */}
-          {hasRated && (
-            <div className="absolute bottom-3 left-3 flex items-center gap-1 bg-green-500/80 backdrop-blur-sm rounded-full px-2 py-1">
-              <Check className="w-3 h-3 text-white" />
-              <span className="text-white text-xs font-medium">Rated {existingRating?.rating}/10</span>
-            </div>
-          )}
-          {isInWishlist && !hasRated && (
-            <div className="absolute bottom-3 left-3 flex items-center gap-1 bg-pink-500/80 backdrop-blur-sm rounded-full px-2 py-1">
-              <Heart className="w-3 h-3 text-white fill-white" />
-              <span className="text-white text-xs font-medium">Wishlisted</span>
-            </div>
-          )}
-
-          {/* Hover Actions */}
-          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
-            <button
-              onClick={() => setShowDetails(true)}
-              className="p-2.5 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors"
-              title="View Details"
-            >
-              <Info className="w-5 h-5 text-white" />
-            </button>
-            {!hasRated && !isInWishlist && (
+        {/* Bottom Content */}
+        <div className="absolute bottom-0 left-0 right-0 p-4">
+          <h3 className="text-white font-bold text-lg leading-tight mb-1 line-clamp-2 drop-shadow-lg">
+            {title}
+          </h3>
+          <div className="flex items-center gap-2 text-xs text-gray-300 mb-2">
+            <span>{year}</span>
+            {genres.length > 0 && (
               <>
-                <button
-                  onClick={handleSeen}
-                  className="p-2.5 bg-green-500/80 backdrop-blur-sm rounded-full hover:bg-green-500 transition-colors"
-                  title="I've seen this"
-                >
-                  <Eye className="w-5 h-5 text-white" />
-                </button>
-                <button
-                  onClick={handleAddToWishlist}
-                  className="p-2.5 bg-pink-500/80 backdrop-blur-sm rounded-full hover:bg-pink-500 transition-colors"
-                  title="Add to Wishlist"
-                >
-                  <BookmarkPlus className="w-5 h-5 text-white" />
-                </button>
+                <span className="w-1 h-1 bg-gray-400 rounded-full" />
+                <span className="truncate">{genres.join(', ')}</span>
               </>
             )}
           </div>
-        </div>
 
-        {/* Info */}
-        <div className="p-4">
-          <h3 className="text-white font-semibold text-sm truncate mb-1" title={title}>
-            {title}
-          </h3>
-          <div className="flex items-center gap-2 text-xs text-gray-400 mb-2">
-            <span>{year}</span>
-            <span>•</span>
-            <span className="capitalize">{movie.media_type === 'tv' ? 'TV Series' : 'Movie'}</span>
-          </div>
-          <div className="flex flex-wrap gap-1">
-            {genres.map((genre) => (
-              <span
-                key={genre}
-                className="text-xs bg-white/5 text-gray-300 px-2 py-0.5 rounded-full"
-              >
-                {genre}
-              </span>
-            ))}
-          </div>
-
-          {/* Quick Actions (always visible) */}
+          {/* Action Buttons */}
           {!hasRated && !isInWishlist && (
-            <div className="flex gap-2 mt-3">
+            <div className="flex gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               <button
-                onClick={handleSeen}
-                className="flex-1 flex items-center justify-center gap-1.5 bg-green-500/20 hover:bg-green-500/30 text-green-400 text-xs font-medium py-2 rounded-lg transition-colors"
+                onClick={(e) => { e.stopPropagation(); handleSeen(); }}
+                className="flex-1 flex items-center justify-center gap-1.5 bg-green-500/90 hover:bg-green-500 text-white text-xs font-medium py-2 rounded-lg transition-colors backdrop-blur-sm"
               >
                 <ThumbsUp className="w-3.5 h-3.5" />
                 Seen it
               </button>
               <button
-                onClick={handleAddToWishlist}
-                className="flex-1 flex items-center justify-center gap-1.5 bg-pink-500/20 hover:bg-pink-500/30 text-pink-400 text-xs font-medium py-2 rounded-lg transition-colors"
+                onClick={(e) => { e.stopPropagation(); handleAddToWishlist(); }}
+                className="flex-1 flex items-center justify-center gap-1.5 bg-pink-500/90 hover:bg-pink-500 text-white text-xs font-medium py-2 rounded-lg transition-colors backdrop-blur-sm"
               >
                 <Heart className="w-3.5 h-3.5" />
                 Wishlist
@@ -186,12 +161,12 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, index }) => {
             </div>
           )}
           {hasRated && (
-            <div className="flex items-center gap-1 mt-3">
+            <div className="flex items-center gap-1 mt-2">
               {Array.from({ length: 10 }, (_, i) => (
                 <div
                   key={i}
-                  className={`h-1.5 flex-1 rounded-full ${
-                    i < (existingRating?.rating || 0) ? 'bg-green-400' : 'bg-gray-700'
+                  className={`h-1 flex-1 rounded-full ${
+                    i < (existingRating?.rating || 0) ? 'bg-green-400' : 'bg-white/20'
                   }`}
                 />
               ))}
@@ -199,27 +174,26 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, index }) => {
           )}
           {isInWishlist && !hasRated && (
             <button
-              onClick={handleRemoveFromWishlist}
-              className="w-full flex items-center justify-center gap-1.5 bg-gray-700/50 hover:bg-red-500/20 text-gray-400 hover:text-red-400 text-xs font-medium py-2 rounded-lg transition-colors mt-3"
+              onClick={(e) => { e.stopPropagation(); handleRemoveFromWishlist(); }}
+              className="w-full flex items-center justify-center gap-1.5 bg-white/10 hover:bg-red-500/30 text-gray-300 hover:text-red-300 text-xs font-medium py-2 rounded-lg transition-colors mt-2 backdrop-blur-sm"
             >
               <X className="w-3.5 h-3.5" />
-              Remove from Wishlist
+              Remove
             </button>
           )}
         </div>
-      </motion.div>
+      </div>
 
       {/* Details Modal */}
       {showDetails && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowDetails(false)}>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowDetails(false)}>
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             className="bg-gray-900 border border-white/10 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Backdrop */}
-            <div className="relative h-48 sm:h-64 overflow-hidden rounded-t-2xl">
+            <div className="relative h-56 sm:h-72 overflow-hidden rounded-t-2xl">
               <img
                 src={getImageUrl(movie.backdrop_path, 'w1280')}
                 alt={title}
@@ -245,7 +219,6 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, index }) => {
               </div>
             </div>
 
-            {/* Content */}
             <div className="p-6">
               <div className="flex flex-wrap gap-2 mb-4">
                 {genres.map((genre) => (
@@ -253,32 +226,23 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, index }) => {
                     {genre}
                   </span>
                 ))}
-                <span className={`text-sm px-3 py-1 rounded-full ${
-                  movie.media_type === 'tv' ? 'bg-purple-500/20 text-purple-300' : 'bg-blue-500/20 text-blue-300'
-                }`}>
-                  {movie.media_type === 'tv' ? 'TV Series' : 'Movie'}
-                </span>
               </div>
 
               <p className="text-gray-300 text-sm leading-relaxed mb-6">
-                {movie.overview || 'No overview available for this title.'}
+                {movie.overview || 'No overview available.'}
               </p>
 
-              {/* Simulated Ratings from IMDB & RT */}
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="bg-[#F5C518]/10 border border-[#F5C518]/20 rounded-xl p-4 text-center">
-                  <p className="text-[#F5C518] text-xs font-medium mb-1">IMDB Rating</p>
+                  <p className="text-[#F5C518] text-xs font-medium mb-1">IMDB</p>
                   <p className="text-2xl font-bold text-white">{(movie.vote_average * 0.9 + 0.5).toFixed(1)}</p>
-                  <p className="text-gray-400 text-xs">/10</p>
                 </div>
                 <div className="bg-[#FA320A]/10 border border-[#FA320A]/20 rounded-xl p-4 text-center">
                   <p className="text-[#FA320A] text-xs font-medium mb-1">Rotten Tomatoes</p>
                   <p className="text-2xl font-bold text-white">{Math.min(99, Math.round(movie.vote_average * 10 + 5))}%</p>
-                  <p className="text-gray-400 text-xs">Tomatometer</p>
                 </div>
               </div>
 
-              {/* Actions */}
               {!hasRated && !isInWishlist && (
                 <div className="flex gap-3">
                   <button
@@ -293,18 +257,23 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, index }) => {
                     className="flex-1 flex items-center justify-center gap-2 bg-pink-500 hover:bg-pink-600 text-white font-medium py-3 rounded-xl transition-colors"
                   >
                     <Heart className="w-4 h-4" />
-                    Add to Wishlist
+                    Wishlist
                   </button>
                 </div>
               )}
               {hasRated && (
                 <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4 text-center">
                   <p className="text-green-400 text-sm">You rated this {existingRating?.rating}/10</p>
+                  {existingRating?.watchedAt && (
+                    <p className="text-gray-400 text-xs mt-1">
+                      Watched: {MONTHS[(existingRating.watchedAt.month || 1) - 1]} {existingRating.watchedAt.year}
+                    </p>
+                  )}
                 </div>
               )}
               {isInWishlist && !hasRated && (
                 <div className="bg-pink-500/10 border border-pink-500/20 rounded-xl p-4 text-center">
-                  <p className="text-pink-400 text-sm">This is in your wishlist</p>
+                  <p className="text-pink-400 text-sm">In your wishlist</p>
                 </div>
               )}
             </div>
@@ -312,13 +281,13 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, index }) => {
         </div>
       )}
 
-      {/* Rating Modal */}
+      {/* Rating Modal with Watched Date */}
       {showRating && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowRating(false)}>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowRating(false)}>
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="bg-gray-900 border border-white/10 rounded-2xl w-full max-w-md shadow-2xl"
+            className="bg-gray-900 border border-white/10 rounded-2xl w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6">
@@ -343,16 +312,16 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, index }) => {
               </div>
 
               {/* Star Rating */}
-              <div className="text-center mb-6">
+              <div className="text-center mb-5">
                 <p className="text-gray-400 text-sm mb-3">Your Rating</p>
-                <div className="flex items-center justify-center gap-1">
+                <div className="flex items-center justify-center gap-0.5">
                   {Array.from({ length: 10 }, (_, i) => (
                     <button
                       key={i}
                       onMouseEnter={() => setHoverRating(i + 1)}
                       onMouseLeave={() => setHoverRating(0)}
                       onClick={() => setUserRating(i + 1)}
-                      className="p-1 transition-transform hover:scale-110"
+                      className="p-0.5 transition-transform hover:scale-125"
                     >
                       <Star
                         className={`w-7 h-7 transition-colors ${
@@ -369,6 +338,38 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, index }) => {
                 </p>
               </div>
 
+              {/* Watched Date - Optional */}
+              <div className="mb-5 bg-white/5 border border-white/10 rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Calendar className="w-4 h-4 text-purple-400" />
+                  <p className="text-white text-sm font-medium">When did you watch it?</p>
+                  <span className="text-gray-500 text-xs">(optional)</span>
+                </div>
+                <div className="flex gap-2">
+                  <select
+                    value={watchedYear}
+                    onChange={(e) => setWatchedYear(e.target.value)}
+                    className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-purple-500 appearance-none cursor-pointer"
+                  >
+                    <option value="" className="bg-gray-900">Year</option>
+                    {yearOptions.map((y) => (
+                      <option key={y} value={y} className="bg-gray-900">{y}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={watchedMonth}
+                    onChange={(e) => setWatchedMonth(e.target.value)}
+                    disabled={!watchedYear}
+                    className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-purple-500 appearance-none cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    <option value="" className="bg-gray-900">Month</option>
+                    {MONTHS.map((m, i) => (
+                      <option key={m} value={i + 1} className="bg-gray-900">{m}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
               {/* Review */}
               <textarea
                 placeholder="Write a short review (optional)..."
@@ -380,7 +381,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, index }) => {
               {/* Sync Info */}
               <div className="bg-white/5 rounded-xl p-3 mb-4">
                 <p className="text-gray-400 text-xs text-center">
-                  Your rating will be synced to IMDB & Rotten Tomatoes (if connected)
+                  Your rating will be synced to IMDB & Rotten Tomatoes
                 </p>
               </div>
 

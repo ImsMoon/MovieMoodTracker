@@ -270,11 +270,55 @@ const Profile: React.FC = () => {
         </motion.div>
       )}
 
+      {/* Recent Activity */}
+      {ratings.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="bg-gray-800/50 border border-white/5 rounded-2xl p-6 mb-8"
+        >
+          <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <Film className="w-5 h-5 text-blue-400" />
+            Recent Ratings
+          </h2>
+          <div className="space-y-3">
+            {ratings.slice(-5).reverse().map((r) => {
+              const movieTitle = r.movieData?.title || r.movieData?.name || 'Unknown';
+              const watchedLabel = r.watchedAt
+                ? `${r.watchedAt.month ? ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][r.watchedAt.month - 1] + ' ' : ''}${r.watchedAt.year}`
+                : null;
+              return (
+                <div key={r.movieId} className="flex items-center gap-3 p-3 bg-white/5 rounded-xl">
+                  <img
+                    src={r.movieData?.poster_path ? `https://image.tmdb.org/t/p/w200${r.movieData.poster_path}` : ''}
+                    alt={movieTitle}
+                    className="w-10 h-14 object-cover rounded-lg bg-gray-700"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white text-sm font-medium truncate">{movieTitle}</p>
+                    <p className="text-gray-400 text-xs">
+                      Rated {r.rating}/10
+                      {watchedLabel && ` • Watched ${watchedLabel}`}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1 bg-yellow-500/20 px-2 py-1 rounded-lg">
+                    <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                    <span className="text-yellow-300 text-sm font-bold">{r.rating}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </motion.div>
+      )}
+
       {/* Logout */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
+        transition={{ delay: 0.6 }}
         className="text-center"
       >
         <button
