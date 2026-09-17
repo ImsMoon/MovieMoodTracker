@@ -8,6 +8,8 @@ import Wishlist from './components/Wishlist';
 import RatedMovies from './components/RatedMovies';
 import Profile from './components/Profile';
 import Stats from './components/Stats';
+import MoodCalendar from './components/MoodCalendar';
+import VendorInsights from './components/VendorInsights';
 
 // Error Boundary
 interface ErrorBoundaryState {
@@ -80,6 +82,10 @@ const AppContent: React.FC = () => {
         return <RatedMovies />;
       case 'stats':
         return <Stats />;
+      case 'mood-calendar':
+        return <MoodCalendar />;
+      case 'insights':
+        return <VendorInsights />;
       case 'profile':
         return <Profile />;
       default:

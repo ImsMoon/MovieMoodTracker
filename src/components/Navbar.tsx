@@ -1,5 +1,5 @@
 import React from 'react';
-import { Film, Heart, User, Star, LogOut, LayoutDashboard, BarChart3 } from 'lucide-react';
+import { Film, Heart, User, Star, LogOut, LayoutDashboard, BarChart3, Calendar, TrendingUp } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { ViewType } from '../types';
 
@@ -10,7 +10,9 @@ const Navbar: React.FC = () => {
     { id: 'dashboard', label: 'Discover', icon: <LayoutDashboard className="w-5 h-5" /> },
     { id: 'rated', label: 'Rated', icon: <Star className="w-5 h-5" />, count: ratings.length },
     { id: 'wishlist', label: 'Wishlist', icon: <Heart className="w-5 h-5" />, count: wishlist.length },
+    { id: 'mood-calendar', label: 'Mood Map', icon: <Calendar className="w-5 h-5" /> },
     { id: 'stats', label: 'Stats', icon: <BarChart3 className="w-5 h-5" /> },
+    { id: 'insights', label: 'Insights', icon: <TrendingUp className="w-5 h-5" /> },
     { id: 'profile', label: 'Profile', icon: <User className="w-5 h-5" /> },
   ];
 
@@ -21,29 +23,29 @@ const Navbar: React.FC = () => {
           {/* Logo */}
           <div className="flex items-center gap-3">
             <button onClick={() => setCurrentView('dashboard')} className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-9 h-9 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg">
-                <Film className="w-5 h-5 text-white" />
+              <div className="flex items-center justify-center w-9 h-9 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg">
+                <span className="text-lg">🎭</span>
               </div>
-              <span className="text-xl font-bold text-white hidden sm:block">MovieTracker</span>
+              <span className="text-xl font-bold text-white hidden sm:block">MoodFlix</span>
             </button>
           </div>
 
           {/* Nav Items */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 overflow-x-auto">
             {navItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => setCurrentView(item.id)}
-                className={`relative flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 ${
+                className={`relative flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 whitespace-nowrap ${
                   currentView === item.id
                     ? 'bg-white/10 text-white'
                     : 'text-gray-400 hover:text-white hover:bg-white/5'
                 }`}
               >
                 {item.icon}
-                <span className="hidden md:inline text-sm font-medium">{item.label}</span>
+                <span className="hidden lg:inline text-sm font-medium">{item.label}</span>
                 {item.count !== undefined && item.count > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                  <span className="absolute -top-1 -right-1 bg-purple-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
                     {item.count > 99 ? '99+' : item.count}
                   </span>
                 )}

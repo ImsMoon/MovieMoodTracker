@@ -53,6 +53,7 @@ export const fetchPopularMovies = async (page: number = 1): Promise<Movie[]> => 
     return data.results.map((movie: any) => ({
       ...movie,
       media_type: 'movie' as const,
+      origin_country: movie.origin_country || ['US'],
     }));
   } catch (error) {
     console.error('Error fetching popular movies:', error);
@@ -71,6 +72,7 @@ export const fetchPopularTV = async (page: number = 1): Promise<Movie[]> => {
       media_type: 'tv' as const,
       title: show.name,
       release_date: show.first_air_date,
+      origin_country: show.origin_country || ['US'],
     }));
   } catch (error) {
     console.error('Error fetching popular TV shows:', error);
@@ -88,6 +90,7 @@ export const fetchTrending = async (): Promise<Movie[]> => {
       ...item,
       title: item.title || item.name,
       release_date: item.release_date || item.first_air_date,
+      origin_country: item.origin_country || ['US'],
     }));
   } catch (error) {
     console.error('Error fetching trending:', error);

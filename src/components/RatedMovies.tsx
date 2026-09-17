@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Star, CheckCircle, XCircle, RefreshCw, Film, ChevronLeft, ChevronRight } from 'lucide-react';
+import { getMoodInfo } from '../types';
 import { Movie } from '../types';
 import { useApp } from '../context/AppContext';
 import { getImageUrl, fetchPopularMovies, fetchPopularTV, fetchTrending } from '../services/tmdb';
@@ -231,6 +232,14 @@ const RatedMovies: React.FC = () => {
                   <Star className="w-4 h-4 text-white fill-white" />
                   <span className="text-white font-bold text-sm">{rating.rating}/10</span>
                 </div>
+
+                {/* Mood Badge */}
+                {rating.mood && (
+                  <div className="absolute top-14 right-3 flex items-center gap-1 bg-black/60 backdrop-blur-sm rounded-full px-2.5 py-1">
+                    <span className="text-sm">{getMoodInfo(rating.mood).emoji}</span>
+                    <span className="text-white text-xs font-medium">{getMoodInfo(rating.mood).label}</span>
+                  </div>
+                )}
 
                 {/* Sync Badges */}
                 <div className="absolute top-3 left-3 flex flex-col gap-1.5">

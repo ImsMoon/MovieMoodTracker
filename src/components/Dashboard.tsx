@@ -88,7 +88,7 @@ const Dashboard: React.FC = () => {
       >
         <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">Discover</h1>
         <p className="text-gray-400">
-          Swipe right to rate, swipe left to wishlist
+          Swipe right to log your mood, swipe left to wishlist
         </p>
       </motion.div>
 

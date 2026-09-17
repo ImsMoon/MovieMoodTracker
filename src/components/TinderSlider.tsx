@@ -1,9 +1,10 @@
 import React, { useState, useRef } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo, AnimatePresence } from 'framer-motion';
 import { Star, Heart, Eye, Info, X, ThumbsUp, BookmarkPlus, Film, Check, Calendar } from 'lucide-react';
-import { Movie, UserRating, WishlistItem, WatchedDate } from '../types';
+import { Movie, UserRating, WishlistItem, WatchedDate, getMoodInfo } from '../types';
 import { useApp } from '../context/AppContext';
 import { getImageUrl, GENRE_MAP } from '../services/tmdb';
+import MoodRatingModal from './MoodRatingModal';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -158,14 +159,6 @@ const TinderSlider: React.FC<TinderSliderProps> = ({ movies, loading, onLoadMore
   const [showRating, setShowRating] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [currentMovie, setCurrentMovie] = useState<Movie | null>(null);
-  const [userRating, setUserRating] = useState(0);
-  const [hoverRating, setHoverRating] = useState(0);
-  const [review, setReview] = useState('');
-  const [watchedYear, setWatchedYear] = useState<string>('');
-  const [watchedMonth, setWatchedMonth] = useState<string>('');
-
-  const currentYear = new Date().getFullYear();
-  const yearOptions = Array.from({ length: 30 }, (_, i) => currentYear - i);
 
   const visibleCards = movies.slice(currentIndex, currentIndex + 3);
 
@@ -193,45 +186,7 @@ const TinderSlider: React.FC<TinderSliderProps> = ({ movies, loading, onLoadMore
     }
   };
 
-  const handleSubmitRating = () => {
-    if (!currentMovie || userRating === 0) return;
-    
-    const watchedAt: WatchedDate | undefined = watchedYear ? {
-      year: parseInt(watchedYear),
-      month: watchedMonth ? parseInt(watchedMonth) : undefined,
-    } : undefined;
 
-    const rating: UserRating = {
-      movieId: currentMovie.id,
-      rating: userRating,
-      review: review || undefined,
-      ratedAt: new Date().toISOString(),
-      syncedToIMDB: false,
-      syncedToRT: false,
-      movieData: currentMovie,
-      watchedAt,
-    };
-    addRating(rating);
-    
-    // Remove from wishlist if it was there
-    const isInWishlist = wishlist.some((w) => w.movieId === currentMovie.id);
-    if (isInWishlist) {
-      removeFromWishlist(currentMovie.id);
-    }
-
-    setShowRating(false);
-    setCurrentMovie(null);
-    setUserRating(0);
-    setReview('');
-    setWatchedYear('');
-    setWatchedMonth('');
-    setCurrentIndex((prev) => prev + 1);
-    
-    // Load more when approaching end
-    if (currentIndex + 5 >= movies.length) {
-      onLoadMore();
-    }
-  };
 
   const handleAction = (action: 'left' | 'right') => {
     const movie = movies[currentIndex];
@@ -327,7 +282,10 @@ const TinderSlider: React.FC<TinderSliderProps> = ({ movies, loading, onLoadMore
             {hasRated && (
               <div className="flex items-center gap-2 bg-green-500/90 backdrop-blur-sm rounded-full px-4 py-2">
                 <Check className="w-4 h-4 text-white" />
-                <span className="text-white text-sm font-medium">Already Rated</span>
+                <span className="text-white text-sm font-medium">
+                  Rated {ratings.find(r => r.movieId === movie.id)?.rating}/10
+                  {ratings.find(r => r.movieId === movie.id)?.mood && ` • ${getMoodInfo(ratings.find(r => r.movieId === movie.id)!.mood!).emoji} ${getMoodInfo(ratings.find(r => r.movieId === movie.id)!.mood!).label}`}
+                </span>
               </div>
             )}
             {isInWishlist && !hasRated && (
@@ -397,120 +355,28 @@ const TinderSlider: React.FC<TinderSliderProps> = ({ movies, loading, onLoadMore
         </p>
       </div>
 
-      {/* Rating Modal */}
+      {/* Mood Rating Modal */}
       {showRating && currentMovie && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowRating(false)}>
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="bg-gray-900 border border-white/10 rounded-2xl w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-white">Rate this {currentMovie.media_type === 'tv' ? 'Series' : 'Movie'}</h3>
-                <button onClick={() => setShowRating(false)} className="text-gray-400 hover:text-white">
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* Movie Info */}
-              <div className="flex items-center gap-3 mb-6">
-                <img
-                  src={getImageUrl(currentMovie.poster_path, 'w200')}
-                  alt={currentMovie.title || currentMovie.name}
-                  className="w-12 h-16 object-cover rounded-lg"
-                />
-                <div>
-                  <p className="text-white font-medium text-sm">{currentMovie.title || currentMovie.name}</p>
-                  <p className="text-gray-400 text-xs">
-                    {(currentMovie.release_date || currentMovie.first_air_date || '').split('-')[0]} • {currentMovie.media_type === 'tv' ? 'Series' : 'Movie'}
-                  </p>
-                </div>
-              </div>
-
-              {/* Star Rating */}
-              <div className="text-center mb-5">
-                <p className="text-gray-400 text-sm mb-3">Your Rating</p>
-                <div className="flex items-center justify-center gap-0.5">
-                  {Array.from({ length: 10 }, (_, i) => (
-                    <button
-                      key={i}
-                      onMouseEnter={() => setHoverRating(i + 1)}
-                      onMouseLeave={() => setHoverRating(0)}
-                      onClick={() => setUserRating(i + 1)}
-                      className="p-0.5 transition-transform hover:scale-125"
-                    >
-                      <Star
-                        className={`w-7 h-7 transition-colors ${
-                          i < (hoverRating || userRating)
-                            ? 'text-yellow-400 fill-yellow-400'
-                            : 'text-gray-600'
-                        }`}
-                      />
-                    </button>
-                  ))}
-                </div>
-                <p className="text-white text-2xl font-bold mt-2">
-                  {hoverRating || userRating || 0}<span className="text-gray-500 text-lg">/10</span>
-                </p>
-              </div>
-
-              {/* Watched Date */}
-              <div className="mb-5 bg-white/5 border border-white/10 rounded-xl p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <Calendar className="w-4 h-4 text-purple-400" />
-                  <p className="text-white text-sm font-medium">When did you watch it?</p>
-                  <span className="text-gray-500 text-xs">(optional)</span>
-                </div>
-                <div className="flex gap-2">
-                  <select
-                    value={watchedYear}
-                    onChange={(e) => setWatchedYear(e.target.value)}
-                    className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-purple-500 appearance-none cursor-pointer"
-                  >
-                    <option value="" className="bg-gray-900">Year</option>
-                    {yearOptions.map((y) => (
-                      <option key={y} value={y} className="bg-gray-900">{y}</option>
-                    ))}
-                  </select>
-                  <select
-                    value={watchedMonth}
-                    onChange={(e) => setWatchedMonth(e.target.value)}
-                    disabled={!watchedYear}
-                    className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-purple-500 appearance-none cursor-pointer disabled:opacity-40"
-                  >
-                    <option value="" className="bg-gray-900">Month</option>
-                    {MONTHS.map((m, i) => (
-                      <option key={m} value={i + 1} className="bg-gray-900">{m}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Review */}
-              <textarea
-                placeholder="Write a short review (optional)..."
-                value={review}
-                onChange={(e) => setReview(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-purple-500 resize-none h-20 mb-4"
-              />
-
-              {/* Submit */}
-              <button
-                onClick={handleSubmitRating}
-                disabled={userRating === 0}
-                className={`w-full font-medium py-3 rounded-xl transition-all ${
-                  userRating > 0
-                    ? 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white'
-                    : 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                }`}
-              >
-                {userRating > 0 ? 'Submit Rating' : 'Select a rating'}
-              </button>
-            </div>
-          </motion.div>
-        </div>
+        <MoodRatingModal
+          movie={currentMovie}
+          onClose={() => {
+            setShowRating(false);
+            setCurrentMovie(null);
+          }}
+          onSubmit={(rating) => {
+            addRating(rating);
+            const isInWishlist = wishlist.some((w) => w.movieId === currentMovie.id);
+            if (isInWishlist) {
+              removeFromWishlist(currentMovie.id);
+            }
+            setShowRating(false);
+            setCurrentMovie(null);
+            setCurrentIndex((prev) => prev + 1);
+            if (currentIndex + 5 >= movies.length) {
+              onLoadMore();
+            }
+          }}
+        />
       )}
 
       {/* Details Modal */}

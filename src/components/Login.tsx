@@ -21,6 +21,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     avatar: undefined,
     imdbConnected: false,
     rtConnected: false,
+    joinedAt: new Date().toISOString(),
   });
 
   const handleSocialLogin = (provider: string) => {
@@ -74,6 +75,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       avatar: undefined,
       imdbConnected: false,
       rtConnected: false,
+      joinedAt: new Date().toISOString(),
     };
     setUser(mockUser);
     setAuthenticated(true);
@@ -98,8 +100,8 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
           >
             <Film className="w-10 h-10 text-white" />
           </motion.div>
-          <h1 className="text-4xl font-bold text-white mb-2">MovieTracker</h1>
-          <p className="text-gray-300">Track, Rate & Sync your movie journey</p>
+          <h1 className="text-4xl font-bold text-white mb-2">MoodFlix</h1>
+          <p className="text-gray-300">Track your mood through the movies you watch</p>
         </div>
 
         {/* Login Card */}
@@ -194,16 +196,16 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
           className="mt-8 grid grid-cols-3 gap-4 text-center"
         >
           <div className="text-gray-300">
-            <Film className="w-6 h-6 mx-auto mb-1 text-yellow-400" />
-            <p className="text-xs">Track Movies</p>
+            <span className="text-2xl block mb-1">🎭</span>
+            <p className="text-xs">Track Moods</p>
           </div>
           <div className="text-gray-300">
-            <Tv className="w-6 h-6 mx-auto mb-1 text-purple-400" />
-            <p className="text-xs">Follow Series</p>
+            <span className="text-2xl block mb-1">📅</span>
+            <p className="text-xs">Mood Calendar</p>
           </div>
           <div className="text-gray-300">
-            <Star className="w-6 h-6 mx-auto mb-1 text-orange-400" />
-            <p className="text-xs">Rate & Sync</p>
+            <span className="text-2xl block mb-1">📊</span>
+            <p className="text-xs">Vendor Insights</p>
           </div>
         </motion.div>
       </motion.div>
