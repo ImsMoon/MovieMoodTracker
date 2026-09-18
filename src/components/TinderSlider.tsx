@@ -11,12 +11,13 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 interface TinderCardProps {
   movie: Movie;
   isTop: boolean;
+  stackIndex: number;
   onSwipeLeft: () => void;
   onSwipeRight: () => void;
   onShowDetails: () => void;
 }
 
-const TinderCard: React.FC<TinderCardProps> = ({ movie, isTop, onSwipeLeft, onSwipeRight, onShowDetails }) => {
+const TinderCard: React.FC<TinderCardProps> = ({ movie, isTop, stackIndex, onSwipeLeft, onSwipeRight, onShowDetails }) => {
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-300, 0, 300], [-25, 0, 25]);
   const opacity = useTransform(x, [-300, -150, 0, 150, 300], [0.85, 0.95, 1, 0.95, 0.85]);
@@ -40,6 +41,12 @@ const TinderCard: React.FC<TinderCardProps> = ({ movie, isTop, onSwipeLeft, onSw
     }
   };
 
+  // Calculate stack positioning
+  const stackScale = isTop ? 1 : 1 - (stackIndex * 0.05);
+  const stackTranslateY = stackIndex * 12;
+  const stackOpacity = isTop ? 1 : Math.max(0.4, 1 - (stackIndex * 0.25));
+  const stackZIndex = 100 - stackIndex;
+
   return (
     <motion.div
       drag={isTop ? 'x' : false}
@@ -47,13 +54,15 @@ const TinderCard: React.FC<TinderCardProps> = ({ movie, isTop, onSwipeLeft, onSw
       dragElastic={0.9}
       onDragEnd={handleDragEnd}
       style={{ 
-        x, 
+        x: isTop ? x : 0, 
         rotate: isTop ? rotate : 0,
-        scale: isTop ? scale : 0.95,
-        opacity: isTop ? opacity : 0.85,
+        scale: isTop ? scale : stackScale,
+        opacity: isTop ? opacity : stackOpacity,
+        y: stackTranslateY,
+        zIndex: stackZIndex,
       }}
-      className={`absolute inset-0 cursor-grab active:cursor-grabbing ${!isTop && 'pointer-events-none'}`}
-      whileTap={{ scale: isTop ? 1.02 : 0.95 }}
+      className={`absolute inset-0 ${isTop ? 'cursor-grab active:cursor-grabbing' : 'pointer-events-none'}`}
+      whileTap={isTop ? { scale: 1.02 } : {}}
     >
       <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl border-2 border-white/20 bg-gray-900">
         {/* Background Image */}
@@ -105,7 +114,7 @@ const TinderCard: React.FC<TinderCardProps> = ({ movie, isTop, onSwipeLeft, onSw
         </div>
 
         {/* Bottom Content */}
-        <div className="absolute bottom-0 left-0 right-0 p-8">
+        <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/90 via-black/60 to-transparent pt-20">
           <h2 className="text-white text-4xl sm:text-5xl font-black mb-3 leading-tight drop-shadow-2xl line-clamp-2">
             {title}
           </h2>
@@ -120,14 +129,14 @@ const TinderCard: React.FC<TinderCardProps> = ({ movie, isTop, onSwipeLeft, onSw
             {genres.map((genre) => (
               <span
                 key={genre}
-                className="text-sm bg-white/20 backdrop-blur-sm text-white px-4 py-1.5 rounded-full font-medium"
+                className="text-sm bg-white/30 backdrop-blur-md text-white px-4 py-1.5 rounded-full font-medium border border-white/20"
               >
                 {genre}
               </span>
             ))}
           </div>
 
-          <p className="text-gray-200 text-sm leading-relaxed line-clamp-3 mb-6 drop-shadow-lg">
+          <p className="text-gray-100 text-sm leading-relaxed line-clamp-3 mb-6 drop-shadow-lg">
             {movie.overview || 'No overview available.'}
           </p>
 
@@ -137,7 +146,7 @@ const TinderCard: React.FC<TinderCardProps> = ({ movie, isTop, onSwipeLeft, onSw
               e.stopPropagation();
               onShowDetails();
             }}
-            className="flex items-center gap-2 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white px-4 py-2 rounded-full transition-colors"
+            className="flex items-center gap-2 bg-white/30 backdrop-blur-md hover:bg-white/40 text-white px-4 py-2 rounded-full transition-colors border border-white/20"
           >
             <Info className="w-4 h-4" />
             <span className="text-sm font-medium">More Info</span>
@@ -227,46 +236,13 @@ const TinderSlider: React.FC<TinderSliderProps> = ({ movies, loading, onLoadMore
     <>
       {/* Card Stack */}
       <div className="relative w-full h-[600px] sm:h-[700px] max-w-2xl mx-auto">
-        {/* Background stacked cards for depth */}
-        {visibleCards.length > 1 && (
-          <div
-            className="absolute inset-0 rounded-3xl overflow-hidden border border-white/5 shadow-xl"
-            style={{
-              transform: 'translateY(16px) scale(0.92)',
-              opacity: 0.25,
-            }}
-          >
-            <img
-              src={getImageUrl(visibleCards[1]?.backdrop_path || visibleCards[1]?.poster_path, 'w780')}
-              alt=""
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-black/80" />
-          </div>
-        )}
-        {visibleCards.length > 2 && (
-          <div
-            className="absolute inset-0 rounded-3xl overflow-hidden border border-white/5 shadow-lg"
-            style={{
-              transform: 'translateY(32px) scale(0.86)',
-              opacity: 0.15,
-            }}
-          >
-            <img
-              src={getImageUrl(visibleCards[2]?.backdrop_path || visibleCards[2]?.poster_path, 'w780')}
-              alt=""
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-black/90" />
-          </div>
-        )}
-
         <AnimatePresence mode="popLayout">
           {visibleCards.map((movie, index) => (
             <TinderCard
               key={`${movie.id}-${currentIndex + index}`}
               movie={movie}
               isTop={index === 0}
+              stackIndex={index}
               onSwipeLeft={() => handleSwipeLeft(movie)}
               onSwipeRight={() => handleSwipeRight(movie)}
               onShowDetails={() => {
