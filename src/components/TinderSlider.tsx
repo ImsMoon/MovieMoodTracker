@@ -19,11 +19,11 @@ interface TinderCardProps {
 const TinderCard: React.FC<TinderCardProps> = ({ movie, isTop, onSwipeLeft, onSwipeRight, onShowDetails }) => {
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-300, 0, 300], [-25, 0, 25]);
-  const opacity = useTransform(x, [-300, -150, 0, 150, 300], [0.5, 0.8, 1, 0.8, 0.5]);
-  const scale = useTransform(x, [-300, 0, 300], [0.9, 1, 0.9]);
+  const opacity = useTransform(x, [-300, -150, 0, 150, 300], [0.85, 0.95, 1, 0.95, 0.85]);
+  const scale = useTransform(x, [-300, 0, 300], [0.95, 1, 0.95]);
   
-  const likeOpacity = useTransform(x, [0, 100, 200], [0, 0.5, 1]);
-  const nopeOpacity = useTransform(x, [-200, -100, 0], [1, 0.5, 0]);
+  const likeOpacity = useTransform(x, [0, 100, 200], [0, 0.7, 1]);
+  const nopeOpacity = useTransform(x, [-200, -100, 0], [1, 0.7, 0]);
 
   const title = movie.title || movie.name || 'Unknown';
   const date = movie.release_date || movie.first_air_date || '';
@@ -50,23 +50,24 @@ const TinderCard: React.FC<TinderCardProps> = ({ movie, isTop, onSwipeLeft, onSw
         x, 
         rotate: isTop ? rotate : 0,
         scale: isTop ? scale : 0.95,
-        opacity: isTop ? opacity : 0.7,
+        opacity: isTop ? opacity : 0.85,
       }}
       className={`absolute inset-0 cursor-grab active:cursor-grabbing ${!isTop && 'pointer-events-none'}`}
       whileTap={{ scale: isTop ? 1.02 : 0.95 }}
     >
-      <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl border border-white/10">
+      <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl border-2 border-white/20 bg-gray-900">
         {/* Background Image */}
         <img
           src={getImageUrl(movie.backdrop_path || movie.poster_path, 'original')}
           alt={title}
           className="w-full h-full object-cover"
           draggable={false}
+          loading="eager"
         />
         
-        {/* Gradient Overlays */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-black/20" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent" />
+        {/* Gradient Overlays - more opaque for readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/20 to-transparent" />
 
         {/* Swipe Indicators */}
         {isTop && (
@@ -232,7 +233,7 @@ const TinderSlider: React.FC<TinderSliderProps> = ({ movies, loading, onLoadMore
             className="absolute inset-0 rounded-3xl overflow-hidden border border-white/5 shadow-xl"
             style={{
               transform: 'translateY(16px) scale(0.92)',
-              opacity: 0.4,
+              opacity: 0.25,
             }}
           >
             <img
@@ -240,7 +241,7 @@ const TinderSlider: React.FC<TinderSliderProps> = ({ movies, loading, onLoadMore
               alt=""
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-black/60" />
+            <div className="absolute inset-0 bg-black/80" />
           </div>
         )}
         {visibleCards.length > 2 && (
@@ -248,7 +249,7 @@ const TinderSlider: React.FC<TinderSliderProps> = ({ movies, loading, onLoadMore
             className="absolute inset-0 rounded-3xl overflow-hidden border border-white/5 shadow-lg"
             style={{
               transform: 'translateY(32px) scale(0.86)',
-              opacity: 0.2,
+              opacity: 0.15,
             }}
           >
             <img
@@ -256,11 +257,11 @@ const TinderSlider: React.FC<TinderSliderProps> = ({ movies, loading, onLoadMore
               alt=""
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-black/70" />
+            <div className="absolute inset-0 bg-black/90" />
           </div>
         )}
 
-        <AnimatePresence>
+        <AnimatePresence mode="popLayout">
           {visibleCards.map((movie, index) => (
             <TinderCard
               key={`${movie.id}-${currentIndex + index}`}
