@@ -105,7 +105,7 @@ const TinderCard: React.FC<TinderCardProps> = ({ movie, isTop, onSwipeLeft, onSw
         </div>
 
         {/* Bottom Content */}
-        <div className="absolute bottom-0 left-0 right-0 p-8">
+        <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/90 via-black/60 to-transparent pt-20">
           <h2 className="text-white text-4xl sm:text-5xl font-black mb-3 leading-tight drop-shadow-2xl line-clamp-2">
             {title}
           </h2>
@@ -120,14 +120,14 @@ const TinderCard: React.FC<TinderCardProps> = ({ movie, isTop, onSwipeLeft, onSw
             {genres.map((genre) => (
               <span
                 key={genre}
-                className="text-sm bg-white/20 backdrop-blur-sm text-white px-4 py-1.5 rounded-full font-medium"
+                className="text-sm bg-white/30 backdrop-blur-md text-white px-4 py-1.5 rounded-full font-medium border border-white/20"
               >
                 {genre}
               </span>
             ))}
           </div>
 
-          <p className="text-gray-200 text-sm leading-relaxed line-clamp-3 mb-6 drop-shadow-lg">
+          <p className="text-gray-100 text-sm leading-relaxed line-clamp-3 mb-6 drop-shadow-lg">
             {movie.overview || 'No overview available.'}
           </p>
 
@@ -137,7 +137,7 @@ const TinderCard: React.FC<TinderCardProps> = ({ movie, isTop, onSwipeLeft, onSw
               e.stopPropagation();
               onShowDetails();
             }}
-            className="flex items-center gap-2 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white px-4 py-2 rounded-full transition-colors"
+            className="flex items-center gap-2 bg-white/30 backdrop-blur-md hover:bg-white/40 text-white px-4 py-2 rounded-full transition-colors border border-white/20"
           >
             <Info className="w-4 h-4" />
             <span className="text-sm font-medium">More Info</span>
