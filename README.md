@@ -227,6 +227,11 @@ Detailed documentation is available in the [`docs/`](./docs) folder:
 - [Tech Stack](./docs/TECH_STACK.md) — Technical decisions and rationale
 - [Data Model](./docs/DATA_MODEL.md) — TypeScript types and data structures
 - [Future Roadmap](./docs/FUTURE_ROADMAP.md) — Planned features and improvements
+- [Deployment](./docs/DEPLOYMENT.md) — GitHub Pages deployment guide
+
+## 🐛 Troubleshooting
+
+Having issues? Check the [Troubleshooting Guide](./TROUBLESHOOTING.md) for common problems and solutions.
 
 ---
 
