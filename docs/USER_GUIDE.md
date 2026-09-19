@@ -4,6 +4,12 @@
 
 This guide will walk you through everything you need to know to get started with MoodFlix — from signing up to understanding your mood patterns.
 
+### 🎬 Try the Live Demo First!
+
+**See MoodFlix in action:** [https://moviemoodtracker.imtiyaz-moon.workers.dev/](https://moviemoodtracker.imtiyaz-moon.workers.dev/)
+
+No installation needed — just click the link and start exploring!
+
 ---
 
 ## 🚀 Getting Started

@@ -4,6 +4,10 @@
 
 MoodFlix combines movie discovery with emotional tracking to create a unique behavioral analytics platform. This document details every feature and how it works.
 
+### 🎬 See Features in Action
+
+**Live Demo:** [https://moviemoodtracker.imtiyaz-moon.workers.dev/](https://moviemoodtracker.imtiyaz-moon.workers.dev/)
+
 ---
 
 ## 🎴 Tinder-Style Discovery
