@@ -117,6 +117,31 @@ No API keys needed! The app uses a public TMDB API key for demo purposes. For pr
 1. Get your own TMDB API key at [themoviedb.org](https://www.themoviedb.org/settings/api)
 2. Set up a backend proxy to keep the key secure
 
+## 🌐 Deployment
+
+### Quick Deploy to GitHub Pages
+
+This project includes automatic deployment via GitHub Actions!
+
+1. **Create a new repository** on GitHub named `moodflix`
+2. **Push your code**:
+   ```bash
+   git init
+   git add .
+   git commit -m "Initial commit"
+   git remote add origin https://github.com/YOUR_USERNAME/moodflix.git
+   git branch -M main
+   git push -u origin main
+   ```
+3. **Enable GitHub Pages**:
+   - Go to **Settings** → **Pages**
+   - Under **Source**, select **GitHub Actions**
+4. **Access your site** at `https://YOUR_USERNAME.github.io/moodflix/`
+
+The site will automatically deploy on every push to `main`! 🚀
+
+📖 For detailed deployment instructions, see [Deployment Guide](./docs/DEPLOYMENT.md)
+
 ---
 
 ## 📱 App Views
