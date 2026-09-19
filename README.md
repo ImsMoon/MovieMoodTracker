@@ -2,6 +2,11 @@
 
 > *Track your mood through the movies you watch. Discover patterns. Empower streaming platforms.*
 
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![React](https://img.shields.io/badge/React-18-61dafb.svg)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6.svg)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38bdf8.svg)](https://tailwindcss.com/)
+
 ![MoodFlix Hero](https://image.qwenlm.ai/generated-images/64403090-cb28-4048-b077-5e12c2d8de/_result.png)
 
 ---
@@ -233,7 +238,7 @@ Please read our [contributing guidelines](./docs/FUTURE_ROADMAP.md) before submi
 
 ## 📄 License
 
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache License 2.0 — see the [LICENSE](LICENSE) file for details.
 
 ---
 
