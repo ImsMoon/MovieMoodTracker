@@ -2,6 +2,12 @@
 
 This guide will help you deploy MoodFlix to GitHub Pages using GitHub Actions for automatic deployments.
 
+## 🎬 Live Demo
+
+**See MoodFlix in action:** [https://moviemoodtracker.imtiyaz-moon.workers.dev/](https://moviemoodtracker.imtiyaz-moon.workers.dev/)
+
+This is a fully functional deployment of MoodFlix. Try swiping through movies, logging your mood, and exploring the analytics!
+
 ## Prerequisites
 
 - GitHub account

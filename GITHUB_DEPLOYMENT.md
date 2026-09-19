@@ -2,6 +2,10 @@
 
 Your MoodFlix project is now fully configured for deployment to GitHub Pages!
 
+## 🎬 Live Demo
+
+**See it in action:** [https://moviemoodtracker.imtiyaz-moon.workers.dev/](https://moviemoodtracker.imtiyaz-moon.workers.dev/)
+
 ## ✅ What's Been Set Up
 
 ### 1. **GitHub Actions Workflow** (`.github/workflows/deploy.yml`)

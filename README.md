@@ -6,6 +6,11 @@
 [![React](https://img.shields.io/badge/React-18-61dafb.svg)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6.svg)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38bdf8.svg)](https://tailwindcss.com/)
+[![Demo](https://img.shields.io/badge/Live-Demo-brightgreen.svg)](https://moviemoodtracker.imtiyaz-moon.workers.dev/)
+
+## 🚀 [Live Demo](https://moviemoodtracker.imtiyaz-moon.workers.dev/)
+
+**Try it now:** [https://moviemoodtracker.imtiyaz-moon.workers.dev/](https://moviemoodtracker.imtiyaz-moon.workers.dev/)
 
 ![MoodFlix Hero](https://image.qwenlm.ai/generated-images/64403090-cb28-4048-b077-5e12c2d8de/_result.png)
 
