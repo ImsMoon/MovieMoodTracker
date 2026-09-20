@@ -224,15 +224,19 @@ moodflix/
 
 Detailed documentation is available in the [`docs/`](./docs) folder:
 
+### 🎓 For Developers
+- **[🚀 CODING GUIDE (Start Here!)](./docs/CODING_GUIDE.md)** — Beginner-friendly guide to understanding and rebuilding the project
 - [Architecture](./docs/ARCHITECTURE.md) — System design and component flow
+- [Tech Stack](./docs/TECH_STACK.md) — Technical decisions and rationale
+- [Data Model](./docs/DATA_MODEL.md) — TypeScript types and data structures
+- [Deployment](./docs/DEPLOYMENT.md) — GitHub Pages deployment guide
+- [Future Roadmap](./docs/FUTURE_ROADMAP.md) — Planned features and improvements
+
+### 🎬 For Users
 - [Features](./docs/FEATURES.md) — Complete feature breakdown
 - [Mood Tracking](./docs/MOOD_TRACKING.md) — How mood data is captured and analyzed
 - [Vendor Insights](./docs/VENDOR_INSIGHTS.md) — How platform recommendations work
 - [User Guide](./docs/USER_GUIDE.md) — Step-by-step user walkthrough
-- [Tech Stack](./docs/TECH_STACK.md) — Technical decisions and rationale
-- [Data Model](./docs/DATA_MODEL.md) — TypeScript types and data structures
-- [Future Roadmap](./docs/FUTURE_ROADMAP.md) — Planned features and improvements
-- [Deployment](./docs/DEPLOYMENT.md) — GitHub Pages deployment guide
 
 ## 🐛 Troubleshooting
 
